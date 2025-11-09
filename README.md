@@ -11,8 +11,11 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 - ✅ **Health Check**: Verify connectivity and authentication
 - ✅ **Schema Introspection**: Debug tool to explore available fields
 
+### v0.2.0 - Latest
+- ✅ **Robust Search**: Search issues by project, assignee, status, priority, labels, and date ranges
+- ✅ **JQL Support**: Execute raw JQL queries directly with full Jira Query Language support
+
 ### Coming Soon
-- 🔜 **Robust Search**: Search issues by project, assignee, status, labels, dates (v0.2.0)
 - 🔜 **Custom Filters**: Save and reuse complex search queries (v0.3.0)
 - 🔜 **Workflow Transitions**: Move issues through workflow states (v0.4.0)
 - 🔜 **Comment Management**: Add and retrieve issue comments (v0.5.0)
@@ -132,6 +135,55 @@ jira_project_get_schema(
 # Returns all available fields, their types, and validation rules
 ```
 
+### Search Issues
+
+```python
+# Search by project
+jira_search_issues(project="PROJ")
+
+# Search with multiple criteria
+jira_search_issues(
+    project="PROJ",
+    status="Open",
+    assignee="currentUser()",
+    priority="High",
+    max_results=10
+)
+
+# Search by date range
+jira_search_issues(
+    project="PROJ",
+    created_after="2025-01-01",
+    created_before="2025-12-31"
+)
+
+# Search by labels
+jira_search_issues(
+    project="PROJ",
+    labels=["backend", "urgent"]
+)
+```
+
+### Execute JQL Queries
+
+```python
+# Simple JQL query
+jira_search_jql(jql="project = PROJ AND status = Open")
+
+# Complex JQL with date functions and ordering
+jira_search_jql(
+    jql='project = PROJ AND created >= -7d AND assignee = currentUser() ORDER BY created DESC',
+    max_results=20
+)
+
+# JQL with multiple conditions
+jira_search_jql(
+    jql='project = PROJ AND status IN ("Open", "In Progress") AND priority = High',
+    max_results=50,
+    start_at=0
+)
+```
+
 ## Configuration
 
 Environment variables:
@@ -188,7 +240,7 @@ ruff format src/ tests/
 
 ## MCP Tools
 
-### MVP (v0.1.0) - Available Now
+### MVP (v0.1.0)
 
 #### Issue Management
 - `jira_issue_create` - Create new issues with automatic custom field validation
@@ -199,11 +251,13 @@ ruff format src/ tests/
 - `jira_health_check` - Verify connection and authentication status
 - `jira_project_get_schema` - Get project schema for debugging (shows all available fields, types, and validation rules)
 
-### Coming in Future Releases
+### v0.2.0 - Latest
 
-#### Search (v0.2.0)
-- `jira_search_issues` - Search with multiple criteria
-- `jira_search_jql` - Execute JQL queries directly
+#### Search
+- `jira_search_issues` - Search with multiple criteria (project, assignee, status, priority, labels, date ranges)
+- `jira_search_jql` - Execute JQL queries directly with full Jira Query Language support
+
+### Coming in Future Releases
 
 #### Filters (v0.3.0)
 - `jira_filter_create` - Create custom filter

@@ -14,6 +14,11 @@ from jira_mcp_server.tools.issue_tools import (
     jira_issue_get,
     jira_issue_update,
 )
+from jira_mcp_server.tools.search_tools import (
+    initialize_search_tools,
+    jira_search_issues,
+    jira_search_jql,
+)
 
 # Initialize FastMCP server
 mcp = FastMCP("jira-mcp-server")
@@ -210,14 +215,110 @@ def jira_project_get_schema(project: str, issue_type: str = "Task") -> Dict[str,
         return {"error": str(e)}  # pragma: no cover
 
 
+# Register search tools
+@mcp.tool()
+def jira_search_issues_tool(
+    project: str | None = None,
+    assignee: str | None = None,
+    status: str | None = None,
+    priority: str | None = None,
+    labels: list[str] | None = None,
+    created_after: str | None = None,
+    created_before: str | None = None,
+    updated_after: str | None = None,
+    updated_before: str | None = None,
+    max_results: int = 50,
+    start_at: int = 0,
+) -> Dict[str, Any]:
+    """Search for Jira issues using multiple criteria.
+
+    Build a JQL query from the provided criteria and execute it. At least one search criterion must be provided.
+
+    Args:
+        project: Project key (e.g., "PROJ")
+        assignee: Assignee username or "currentUser()" for current user
+        status: Status name (e.g., "Open", "In Progress", "Closed")
+        priority: Priority name (e.g., "High", "Critical", "Low")
+        labels: List of label names to filter by
+        created_after: Created after date in YYYY-MM-DD format
+        created_before: Created before date in YYYY-MM-DD format
+        updated_after: Updated after date in YYYY-MM-DD format
+        updated_before: Updated before date in YYYY-MM-DD format
+        max_results: Maximum results to return (default: 50)
+        start_at: Starting offset for pagination (default: 0)
+
+    Returns:
+        Search results with total count, issues list, and pagination info
+
+    Example:
+        jira_search_issues_tool(
+            project="PROJ",
+            status="Open",
+            assignee="currentUser()",
+            max_results=10
+        )
+    """
+    return jira_search_issues(  # pragma: no cover
+        project=project,
+        assignee=assignee,
+        status=status,
+        priority=priority,
+        labels=labels,
+        created_after=created_after,
+        created_before=created_before,
+        updated_after=updated_after,
+        updated_before=updated_before,
+        max_results=max_results,
+        start_at=start_at,
+    )
+
+
+@mcp.tool()
+def jira_search_jql_tool(
+    jql: str,
+    max_results: int = 50,
+    start_at: int = 0,
+) -> Dict[str, Any]:
+    """Execute a JQL (Jira Query Language) query directly.
+
+    Use this for complex queries that can't be expressed through search_issues criteria.
+    Supports all JQL operators and functions including ORDER BY clauses.
+
+    Args:
+        jql: JQL query string (e.g., 'project = PROJ AND created >= -7d ORDER BY created DESC')
+        max_results: Maximum results to return (default: 50)
+        start_at: Starting offset for pagination (default: 0)
+
+    Returns:
+        Search results with total count, issues list, and pagination info
+
+    Example:
+        jira_search_jql_tool(
+            jql='project = PROJ AND created >= -7d AND assignee = currentUser() ORDER BY created DESC',
+            max_results=20
+        )
+    """
+    return jira_search_jql(  # pragma: no cover
+        jql=jql,
+        max_results=max_results,
+        start_at=start_at,
+    )
+
+
 def main() -> None:
     """Main entry point for the Jira MCP server."""
     try:
         # Load configuration
         config = JiraConfig()  # type: ignore[call-arg]  # pydantic-settings loads from env
 
+        # Initialize client
+        client = JiraClient(config)
+
         # Initialize issue tools
         initialize_issue_tools(config)
+
+        # Initialize search tools
+        initialize_search_tools(client)
 
         print("Starting Jira MCP Server...")
         print(f"Jira URL: {config.jira_url}")
