@@ -427,3 +427,55 @@ class JiraClient:
 
         except httpx.TimeoutException:
             raise ValueError(f"Timeout deleting filter {filter_id}")
+
+    def get_transitions(self, issue_key: str) -> Dict[str, Any]:
+        """Get available transitions for an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+
+        Returns:
+            Available transitions with IDs, names, and destination statuses
+
+        Raises:
+            ValueError: If issue not found or API error
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/transitions"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.get(url, headers=self._get_headers())
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout getting transitions for {issue_key}")
+
+    def transition_issue(self, issue_key: str, transition_id: str, fields: Dict[str, Any] | None = None) -> None:
+        """Transition an issue through workflow.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+            transition_id: Transition ID to execute
+            fields: Optional fields required by the transition
+
+        Raises:
+            ValueError: If transition invalid or API error
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/transitions"
+        data: Dict[str, Any] = {"transition": {"id": transition_id}}
+        if fields:
+            data["fields"] = fields
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(url, headers=self._get_headers(), json=data)
+
+                if response.status_code != 204:
+                    self._handle_error(response)
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout transitioning issue {issue_key}")

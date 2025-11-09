@@ -15,12 +15,15 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 - ✅ **Robust Search**: Search issues by project, assignee, status, priority, labels, and date ranges
 - ✅ **JQL Support**: Execute raw JQL queries directly with full Jira Query Language support
 
-### v0.3.0 - Latest
+### v0.3.0
 - ✅ **Custom Filters**: Save and reuse complex search queries with full CRUD operations
 - ✅ **Filter Execution**: Run saved filters with pagination support
 
+### v0.4.0 - Latest
+- ✅ **Workflow Transitions**: Move issues through workflow states
+- ✅ **Transition Discovery**: Get available transitions for any issue
+
 ### Coming Soon
-- 🔜 **Workflow Transitions**: Move issues through workflow states (v0.4.0)
 - 🔜 **Comment Management**: Add and retrieve issue comments (v0.5.0)
 
 ## Requirements
@@ -215,6 +218,37 @@ jira_filter_update(
 
 # Delete filter
 jira_filter_delete(filter_id="10000")
+```
+
+### Manage Workflow Transitions
+
+```python
+# Get available transitions for an issue
+transitions = jira_workflow_get_transitions(issue_key="PROJ-123")
+# Returns: {
+#   "issue_key": "PROJ-123",
+#   "transitions": [
+#     {"id": "21", "name": "In Progress", "to_status": "In Progress", "has_screen": False, "fields": []},
+#     {"id": "31", "name": "Done", "to_status": "Done", "has_screen": True, "fields": ["resolution"]}
+#   ]
+# }
+
+# Simple transition (no fields required)
+jira_workflow_transition(issue_key="PROJ-123", transition_id="21")
+
+# Transition with required fields (e.g., resolution when closing)
+jira_workflow_transition(
+    issue_key="PROJ-123",
+    transition_id="31",
+    fields={"resolution": {"name": "Done"}}
+)
+
+# Transition with comment
+jira_workflow_transition(
+    issue_key="PROJ-123",
+    transition_id="21",
+    fields={"comment": [{"add": {"body": "Moving to in progress"}}]}
+)
 ```
 
 ## Configuration

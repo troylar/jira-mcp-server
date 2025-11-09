@@ -28,6 +28,11 @@ from jira_mcp_server.tools.search_tools import (
     jira_search_issues,
     jira_search_jql,
 )
+from jira_mcp_server.tools.workflow_tools import (
+    initialize_workflow_tools,
+    jira_workflow_get_transitions,
+    jira_workflow_transition,
+)
 
 # Initialize FastMCP server
 mcp = FastMCP("jira-mcp-server")
@@ -464,6 +469,59 @@ def jira_filter_delete_tool(filter_id: str) -> Dict[str, Any]:
     return jira_filter_delete(filter_id=filter_id)  # pragma: no cover
 
 
+# Register workflow tools
+@mcp.tool()
+def jira_workflow_get_transitions_tool(issue_key: str) -> Dict[str, Any]:
+    """Get available workflow transitions for an issue.
+
+    Returns all transitions available for the issue in its current state, including
+    transition IDs, names, destination statuses, and required fields.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+
+    Returns:
+        Available transitions with IDs, names, destination statuses, and required fields
+
+    Example:
+        jira_workflow_get_transitions_tool(issue_key="PROJ-123")
+    """
+    return jira_workflow_get_transitions(issue_key=issue_key)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_workflow_transition_tool(
+    issue_key: str, transition_id: str, fields: Dict[str, Any] | None = None
+) -> Dict[str, Any]:
+    """Transition an issue through workflow.
+
+    Executes a workflow transition, moving the issue to a new status. Some transitions
+    may require additional fields (e.g., resolution when closing an issue).
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+        transition_id: Transition ID to execute (use get_transitions to find valid IDs)
+        fields: Optional fields required by the transition (e.g., {"resolution": {"name": "Done"}})
+
+    Returns:
+        Success confirmation with issue key and transition details
+
+    Example:
+        # Simple transition
+        jira_workflow_transition_tool(issue_key="PROJ-123", transition_id="21")
+
+        # Transition with resolution
+        jira_workflow_transition_tool(
+            issue_key="PROJ-123",
+            transition_id="31",
+            fields={"resolution": {"name": "Done"}}
+        )
+    """
+    return jira_workflow_transition(  # pragma: no cover
+        issue_key=issue_key, transition_id=transition_id, fields=fields
+    )
+
+
 def main() -> None:
     """Main entry point for the Jira MCP server."""
     try:
@@ -481,6 +539,9 @@ def main() -> None:
 
         # Initialize filter tools
         initialize_filter_tools(client)
+
+        # Initialize workflow tools
+        initialize_workflow_tools(client)
 
         print("Starting Jira MCP Server...")
         print(f"Jira URL: {config.jira_url}")

@@ -862,3 +862,119 @@ class TestJiraClient:
 
         with pytest.raises(ValueError, match="Permission denied"):
             client.delete_filter(filter_id="10000")
+
+    @patch("httpx.Client")
+    def test_get_transitions_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test getting available transitions."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "transitions": [
+                {"id": "21", "name": "In Progress", "to": {"name": "In Progress"}},
+                {"id": "31", "name": "Done", "to": {"name": "Done"}},
+            ]
+        }
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.get_transitions(issue_key="PROJ-123")
+
+        assert len(result["transitions"]) == 2
+        assert result["transitions"][0]["id"] == "21"
+
+    @patch("httpx.Client")
+    def test_get_transitions_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test get transitions handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.get.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout getting transitions for PROJ-123"):
+            client.get_transitions(issue_key="PROJ-123")
+
+    @patch("httpx.Client")
+    def test_get_transitions_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test get transitions handles API errors."""
+        mock_request = Mock()
+        mock_request.url = "https://jira.test.com/rest/api/2/issue/PROJ-123/transitions"
+
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.text = "Not found"
+        mock_response.request = mock_request
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="issue.*does not exist"):
+            client.get_transitions(issue_key="PROJ-123")
+
+    @patch("httpx.Client")
+    def test_transition_issue_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test transitioning an issue."""
+        mock_response = Mock()
+        mock_response.status_code = 204
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        client.transition_issue(issue_key="PROJ-123", transition_id="21")
+
+        # No exception means success
+
+    @patch("httpx.Client")
+    def test_transition_issue_with_fields(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test transition with required fields."""
+        mock_response = Mock()
+        mock_response.status_code = 204
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        fields = {"resolution": {"name": "Done"}}
+        client.transition_issue(issue_key="PROJ-123", transition_id="31", fields=fields)
+
+        # Verify fields were passed
+        call_kwargs = mock_client_instance.post.call_args[1]
+        assert call_kwargs["json"]["fields"] == fields
+
+    @patch("httpx.Client")
+    def test_transition_issue_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test transition handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.post.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout transitioning issue PROJ-123"):
+            client.transition_issue(issue_key="PROJ-123", transition_id="21")
+
+    @patch("httpx.Client")
+    def test_transition_issue_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test transition handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_response.text = "Bad request"
+        mock_response.json.return_value = {"errorMessages": ["Invalid transition"], "errors": {}}
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Validation error"):
+            client.transition_issue(issue_key="PROJ-123", transition_id="99")
