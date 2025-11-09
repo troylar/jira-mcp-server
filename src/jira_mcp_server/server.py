@@ -1,0 +1,238 @@
+"""FastMCP server entry point"""
+
+import sys
+from typing import Any, Dict
+
+from fastmcp import FastMCP
+
+from jira_mcp_server.config import JiraConfig
+from jira_mcp_server.jira_client import JiraClient
+from jira_mcp_server.tools.issue_tools import (
+    _get_field_schema,
+    initialize_issue_tools,
+    jira_issue_create,
+    jira_issue_get,
+    jira_issue_update,
+)
+
+# Initialize FastMCP server
+mcp = FastMCP("jira-mcp-server")
+
+
+# Health check implementation
+def _jira_health_check() -> Dict[str, Any]:
+    """Verify connectivity to Jira instance and validate authentication.
+
+    Returns:
+        Connection status and server info including version and URL
+    """
+    try:
+        config = JiraConfig()  # type: ignore[call-arg]  # pydantic-settings loads from env
+        client = JiraClient(config)
+        return client.health_check()
+    except Exception as e:
+        return {
+            "connected": False,
+            "error": str(e),
+        }
+
+
+# Health check tool
+@mcp.tool()
+def jira_health_check() -> Dict[str, Any]:  # pragma: no cover
+    """Verify connectivity to Jira instance and validate authentication.
+
+    Returns:
+        Connection status and server info including version and URL
+    """
+    return _jira_health_check()  # pragma: no cover
+
+
+# Register issue tools
+@mcp.tool()
+def jira_issue_create_tool(
+    project: str,
+    summary: str,
+    issue_type: str = "Task",
+    description: str = "",
+    priority: str | None = None,
+    assignee: str | None = None,
+    labels: list[str] | None = None,
+    due_date: str | None = None,
+    custom_fields: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Create a new Jira issue with automatic custom field validation.
+
+    The system automatically discovers and validates custom fields based on the project schema.
+
+    Args:
+        project: Project key (e.g., "PROJ", "DEV")
+        summary: Issue title/summary (1-255 characters)
+        issue_type: Type of issue (Task, Bug, Story, etc.) - default: Task
+        description: Detailed issue description (supports Jira markup)
+        priority: Issue priority (if not set, uses project default)
+        assignee: Username or user ID to assign the issue to
+        labels: List of labels to apply to the issue
+        due_date: Due date in ISO format (YYYY-MM-DD)
+        **custom_fields: Additional custom fields as key-value pairs
+
+    Returns:
+        Created issue with key, ID, and all field values
+
+    Example:
+        jira_issue_create_tool(
+            project="PROJ",
+            summary="Implement user authentication",
+            issue_type="Task",
+            priority="High",
+            customfield_10001=5  # Story Points
+        )
+    """
+    kwargs = {}  # pragma: no cover
+    if custom_fields:  # pragma: no cover
+        kwargs.update(custom_fields)  # pragma: no cover
+
+    return jira_issue_create(  # pragma: no cover
+        project=project,
+        summary=summary,
+        issue_type=issue_type,
+        description=description,
+        priority=priority,
+        assignee=assignee,
+        labels=labels or [],
+        due_date=due_date,
+        **kwargs,
+    )
+
+
+@mcp.tool()
+def jira_issue_update_tool(
+    issue_key: str,
+    summary: str | None = None,
+    description: str | None = None,
+    priority: str | None = None,
+    assignee: str | None = None,
+    labels: list[str] | None = None,
+    due_date: str | None = None,
+    custom_fields: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Update an existing Jira issue.
+
+    Only provided fields are updated. Custom fields are validated against the project schema.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+        summary: New issue summary
+        description: New issue description
+        priority: New priority
+        assignee: New assignee (username or ID)
+        labels: Replace existing labels
+        due_date: New due date
+        **custom_fields: Custom fields to update
+
+    Returns:
+        Updated issue with all current field values
+
+    Example:
+        jira_issue_update_tool(
+            issue_key="PROJ-123",
+            summary="Updated summary",
+            priority="Critical"
+        )
+    """
+    kwargs = {}  # pragma: no cover
+    if custom_fields:  # pragma: no cover
+        kwargs.update(custom_fields)  # pragma: no cover
+
+    return jira_issue_update(  # pragma: no cover
+        issue_key=issue_key,
+        summary=summary,
+        description=description,
+        priority=priority,
+        assignee=assignee,
+        labels=labels,
+        due_date=due_date,
+        **kwargs,
+    )
+
+
+@mcp.tool()
+def jira_issue_get_tool(issue_key: str) -> Dict[str, Any]:
+    """Retrieve full details of a single issue including all custom fields.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+
+    Returns:
+        Complete issue details including standard and custom fields
+
+    Example:
+        jira_issue_get_tool(issue_key="PROJ-123")
+    """
+    return jira_issue_get(issue_key=issue_key)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_project_get_schema(project: str, issue_type: str = "Task") -> Dict[str, Any]:
+    """Get field schema for a project and issue type for debugging.
+
+    This tool helps you understand what fields are available for a project
+    and issue type, including custom fields and their validation rules.
+
+    Args:
+        project: Project key (e.g., "PROJ")
+        issue_type: Issue type name (default: "Task")
+
+    Returns:
+        Field schema showing all available fields with their types and requirements
+
+    Example:
+        jira_project_get_schema(project="PROJ", issue_type="Bug")
+    """
+    try:  # pragma: no cover
+        schemas = _get_field_schema(project, issue_type)  # pragma: no cover
+        return {  # pragma: no cover
+            "project": project,
+            "issue_type": issue_type,
+            "fields": [
+                {
+                    "key": schema.key,
+                    "name": schema.name,
+                    "type": schema.type.value,
+                    "required": schema.required,
+                    "custom": schema.custom,
+                    "allowed_values": schema.allowed_values,
+                }
+                for schema in schemas
+            ],
+        }
+    except Exception as e:  # pragma: no cover
+        return {"error": str(e)}  # pragma: no cover
+
+
+def main() -> None:
+    """Main entry point for the Jira MCP server."""
+    try:
+        # Load configuration
+        config = JiraConfig()  # type: ignore[call-arg]  # pydantic-settings loads from env
+
+        # Initialize issue tools
+        initialize_issue_tools(config)
+
+        print("Starting Jira MCP Server...")
+        print(f"Jira URL: {config.jira_url}")
+        print(f"Cache TTL: {config.cache_ttl}s")
+        print(f"Timeout: {config.timeout}s")
+        print()
+        print("Server ready! Use MCP client to interact with Jira.")
+
+        # Run FastMCP server
+        mcp.run()
+
+    except Exception as e:
+        print(f"Error starting server: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
