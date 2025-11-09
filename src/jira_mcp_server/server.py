@@ -7,6 +7,11 @@ from fastmcp import FastMCP
 
 from jira_mcp_server.config import JiraConfig
 from jira_mcp_server.jira_client import JiraClient
+from jira_mcp_server.tools.comment_tools import (
+    initialize_comment_tools,
+    jira_comment_add,
+    jira_comment_list,
+)
 from jira_mcp_server.tools.filter_tools import (
     initialize_filter_tools,
     jira_filter_create,
@@ -522,6 +527,47 @@ def jira_workflow_transition_tool(
     )
 
 
+# Register comment tools
+@mcp.tool()
+def jira_comment_add_tool(issue_key: str, body: str) -> Dict[str, Any]:
+    """Add a comment to an issue.
+
+    Comments support Jira markup for formatting (bold, italic, lists, etc.).
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+        body: Comment text (supports Jira markup)
+
+    Returns:
+        Created comment with ID, author, and timestamp
+
+    Example:
+        jira_comment_add_tool(
+            issue_key="PROJ-123",
+            body="This issue is ready for review"
+        )
+    """
+    return jira_comment_add(issue_key=issue_key, body=body)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_comment_list_tool(issue_key: str) -> Dict[str, Any]:
+    """List all comments on an issue.
+
+    Retrieves all comments with author information and timestamps.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+
+    Returns:
+        Comments list with total count and comment details
+
+    Example:
+        jira_comment_list_tool(issue_key="PROJ-123")
+    """
+    return jira_comment_list(issue_key=issue_key)  # pragma: no cover
+
+
 def main() -> None:
     """Main entry point for the Jira MCP server."""
     try:
@@ -542,6 +588,9 @@ def main() -> None:
 
         # Initialize workflow tools
         initialize_workflow_tools(client)
+
+        # Initialize comment tools
+        initialize_comment_tools(client)
 
         print("Starting Jira MCP Server...")
         print(f"Jira URL: {config.jira_url}")

@@ -479,3 +479,57 @@ class JiraClient:
 
         except httpx.TimeoutException:
             raise ValueError(f"Timeout transitioning issue {issue_key}")
+
+    def add_comment(self, issue_key: str, body: str) -> Dict[str, Any]:
+        """Add a comment to an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+            body: Comment text
+
+        Returns:
+            Created comment data with ID, author, and timestamp
+
+        Raises:
+            ValueError: If issue not found or API error
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment"
+        data = {"body": body}
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(url, headers=self._get_headers(), json=data)
+
+                if response.status_code not in (200, 201):
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout adding comment to issue {issue_key}")
+
+    def list_comments(self, issue_key: str) -> Dict[str, Any]:
+        """List all comments on an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+
+        Returns:
+            Comments list with total count
+
+        Raises:
+            ValueError: If issue not found or API error
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.get(url, headers=self._get_headers())
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout listing comments for issue {issue_key}")

@@ -19,12 +19,13 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 - ✅ **Custom Filters**: Save and reuse complex search queries with full CRUD operations
 - ✅ **Filter Execution**: Run saved filters with pagination support
 
-### v0.4.0 - Latest
+### v0.4.0
 - ✅ **Workflow Transitions**: Move issues through workflow states
 - ✅ **Transition Discovery**: Get available transitions for any issue
 
-### Coming Soon
-- 🔜 **Comment Management**: Add and retrieve issue comments (v0.5.0)
+### v0.5.0 - Latest
+- ✅ **Comment Management**: Add and retrieve issue comments
+- ✅ **Full Comment Support**: Supports Jira markup formatting
 
 ## Requirements
 
@@ -251,6 +252,48 @@ jira_workflow_transition(
 )
 ```
 
+### Manage Comments
+
+```python
+# Add a comment to an issue
+comment = jira_comment_add(
+    issue_key="PROJ-123",
+    body="This issue is ready for review"
+)
+# Returns: {
+#   "id": "10001",
+#   "body": "This issue is ready for review",
+#   "author": {"displayName": "John Doe", "emailAddress": "john@example.com"},
+#   "created": "2025-01-15T10:00:00.000+0000"
+# }
+
+# Add comment with Jira markup
+jira_comment_add(
+    issue_key="PROJ-123",
+    body="Status update:\n* Task 1: *Done*\n* Task 2: _In progress_\n* Task 3: {{Not started}}"
+)
+
+# List all comments on an issue
+comments = jira_comment_list(issue_key="PROJ-123")
+# Returns: {
+#   "comments": [
+#     {
+#       "id": "10001",
+#       "body": "First comment",
+#       "author": {"displayName": "John Doe"},
+#       "created": "2025-01-15T10:00:00.000+0000"
+#     },
+#     {
+#       "id": "10002",
+#       "body": "Second comment",
+#       "author": {"displayName": "Jane Smith"},
+#       "created": "2025-01-15T11:00:00.000+0000"
+#     }
+#   ],
+#   "total": 2
+# }
+```
+
 ## Configuration
 
 Environment variables:
@@ -324,7 +367,7 @@ ruff format src/ tests/
 - `jira_search_issues` - Search with multiple criteria (project, assignee, status, priority, labels, date ranges)
 - `jira_search_jql` - Execute JQL queries directly with full Jira Query Language support
 
-### v0.3.0 - Latest
+### v0.3.0
 
 #### Filters
 - `jira_filter_create` - Create custom filter with name and JQL query
@@ -334,15 +377,17 @@ ruff format src/ tests/
 - `jira_filter_update` - Update filter criteria (name, JQL, description)
 - `jira_filter_delete` - Delete a filter (owner only)
 
-### Coming in Future Releases
+### v0.4.0
 
-#### Workflows (v0.4.0)
+#### Workflows
 - `jira_workflow_get_transitions` - Get available transitions for an issue
 - `jira_workflow_transition` - Transition issue through workflow
 
-#### Comments (v0.5.0)
-- `jira_comment_add` - Add comment to an issue
-- `jira_comment_list` - List all comments on an issue
+### v0.5.0 - Latest
+
+#### Comments
+- `jira_comment_add` - Add comment to an issue (supports Jira markup)
+- `jira_comment_list` - List all comments on an issue with author and timestamp info
 
 ## Troubleshooting
 

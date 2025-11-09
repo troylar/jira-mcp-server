@@ -978,3 +978,146 @@ class TestJiraClient:
 
         with pytest.raises(ValueError, match="Validation error"):
             client.transition_issue(issue_key="PROJ-123", transition_id="99")
+
+    @patch("httpx.Client")
+    def test_add_comment_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test adding a comment to an issue."""
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {
+            "id": "10001",
+            "body": "Test comment",
+            "author": {"displayName": "John Doe"},
+            "created": "2025-01-15T10:00:00.000+0000",
+        }
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.add_comment(issue_key="PROJ-123", body="Test comment")
+
+        assert result["id"] == "10001"
+        assert result["body"] == "Test comment"
+
+    @patch("httpx.Client")
+    def test_add_comment_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test add comment handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.post.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout adding comment to issue PROJ-123"):
+            client.add_comment(issue_key="PROJ-123", body="Test comment")
+
+    @patch("httpx.Client")
+    def test_add_comment_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test add comment handles API errors."""
+        mock_request = Mock()
+        mock_request.url = "https://jira.test.com/rest/api/2/issue/PROJ-123/comment"
+
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.text = "Not found"
+        mock_response.request = mock_request
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="issue.*does not exist"):
+            client.add_comment(issue_key="PROJ-999", body="Test comment")
+
+    @patch("httpx.Client")
+    def test_list_comments_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test listing all comments on an issue."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "comments": [
+                {
+                    "id": "10001",
+                    "body": "First comment",
+                    "author": {"displayName": "John Doe"},
+                    "created": "2025-01-15T10:00:00.000+0000",
+                },
+                {
+                    "id": "10002",
+                    "body": "Second comment",
+                    "author": {"displayName": "Jane Smith"},
+                    "created": "2025-01-15T11:00:00.000+0000",
+                },
+            ],
+            "total": 2,
+            "maxResults": 50,
+            "startAt": 0,
+        }
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.list_comments(issue_key="PROJ-123")
+
+        assert result["total"] == 2
+        assert len(result["comments"]) == 2
+
+    @patch("httpx.Client")
+    def test_list_comments_no_comments(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test listing comments when issue has no comments."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "comments": [],
+            "total": 0,
+            "maxResults": 50,
+            "startAt": 0,
+        }
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.list_comments(issue_key="PROJ-123")
+
+        assert result["total"] == 0
+        assert len(result["comments"]) == 0
+
+    @patch("httpx.Client")
+    def test_list_comments_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test list comments handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.get.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout listing comments for issue PROJ-123"):
+            client.list_comments(issue_key="PROJ-123")
+
+    @patch("httpx.Client")
+    def test_list_comments_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test list comments handles API errors."""
+        mock_request = Mock()
+        mock_request.url = "https://jira.test.com/rest/api/2/issue/PROJ-999/comment"
+
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.text = "Not found"
+        mock_response.request = mock_request
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="issue.*does not exist"):
+            client.list_comments(issue_key="PROJ-999")
