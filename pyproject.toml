@@ -4,25 +4,26 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jira-mcp-server"
-version = "0.1.0"
-description = "FastMCP server for self-hosted Jira instances with intelligent custom field handling"
+version = "0.5.0"
+description = "FastMCP server for self-hosted Jira with full CRUD operations, custom fields, JQL search, filters, workflows, and comments"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your@email.com"},
+    {name = "Troy Larson", email = "troy.larson@gmail.com"},
 ]
-keywords = ["jira", "mcp", "model-context-protocol", "fastmcp", "jira-api"]
+keywords = ["jira", "mcp", "model-context-protocol", "fastmcp", "jira-api", "self-hosted", "workflow", "jql"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business",
 ]
 
 dependencies = [
@@ -49,10 +50,10 @@ dev = [
 jira-mcp-server = "jira_mcp_server.server:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/jira-mcp-server"
-Documentation = "https://github.com/yourusername/jira-mcp-server#readme"
-Repository = "https://github.com/yourusername/jira-mcp-server"
-Issues = "https://github.com/yourusername/jira-mcp-server/issues"
+Homepage = "https://github.com/troylar/jira-mcp-server"
+Documentation = "https://github.com/troylar/jira-mcp-server#readme"
+Repository = "https://github.com/troylar/jira-mcp-server"
+Issues = "https://github.com/troylar/jira-mcp-server/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jira_mcp_server"]
