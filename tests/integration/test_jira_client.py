@@ -590,3 +590,275 @@ class TestJiraClient:
 
         with pytest.raises(ValueError, match="Timeout executing search query"):
             client.search_issues("project = PROJ")
+
+    @patch("httpx.Client")
+    def test_create_filter_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test creating a filter."""
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {"id": "10000", "name": "Test Filter", "jql": "project = PROJ"}
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.create_filter(name="Test Filter", jql="project = PROJ")
+
+        assert result["id"] == "10000"
+        assert result["name"] == "Test Filter"
+
+    @patch("httpx.Client")
+    def test_list_filters_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test listing filters."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = [{"id": "10000", "name": "Filter 1"}]
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.list_filters()
+
+        assert len(result) == 1
+        assert result[0]["id"] == "10000"
+
+    @patch("httpx.Client")
+    def test_get_filter_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test getting a filter."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"id": "10000", "name": "Test Filter", "jql": "project = PROJ"}
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.get_filter(filter_id="10000")
+
+        assert result["id"] == "10000"
+
+    @patch("httpx.Client")
+    def test_update_filter_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test updating a filter."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"id": "10000", "name": "Updated Filter"}
+
+        mock_client_instance = Mock()
+        mock_client_instance.put.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.update_filter(filter_id="10000", name="Updated Filter")
+
+        assert result["name"] == "Updated Filter"
+
+    @patch("httpx.Client")
+    def test_delete_filter_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test deleting a filter."""
+        mock_response = Mock()
+        mock_response.status_code = 204
+
+        mock_client_instance = Mock()
+        mock_client_instance.delete.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        client.delete_filter(filter_id="10000")
+
+        # No exception means success
+
+    @patch("httpx.Client")
+    def test_create_filter_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test create filter handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.post.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout creating filter"):
+            client.create_filter(name="Test", jql="project = PROJ")
+
+    @patch("httpx.Client")
+    def test_create_filter_with_description(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test creating a filter with description."""
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {"id": "10000"}
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        client.create_filter(name="Test", jql="project = PROJ", description="Test description")
+
+        # Verify description was passed
+        call_kwargs = mock_client_instance.post.call_args[1]
+        assert call_kwargs["json"]["description"] == "Test description"
+
+    @patch("httpx.Client")
+    def test_list_filters_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test list filters handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.get.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout listing filters"):
+            client.list_filters()
+
+    @patch("httpx.Client")
+    def test_get_filter_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test get filter handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.get.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout getting filter 10000"):
+            client.get_filter(filter_id="10000")
+
+    @patch("httpx.Client")
+    def test_update_filter_no_fields_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update filter requires at least one field."""
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="At least one field must be provided to update"):
+            client.update_filter(filter_id="10000")
+
+    @patch("httpx.Client")
+    def test_update_filter_all_fields(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update filter with all fields."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"id": "10000"}
+
+        mock_client_instance = Mock()
+        mock_client_instance.put.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        client.update_filter(filter_id="10000", name="New Name", jql="new jql", description="New Desc", favourite=True)
+
+        call_kwargs = mock_client_instance.put.call_args[1]
+        assert call_kwargs["json"]["name"] == "New Name"
+        assert call_kwargs["json"]["jql"] == "new jql"
+        assert call_kwargs["json"]["description"] == "New Desc"
+        assert call_kwargs["json"]["favourite"] is True
+
+    @patch("httpx.Client")
+    def test_update_filter_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update filter handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.put.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout updating filter 10000"):
+            client.update_filter(filter_id="10000", name="Updated")
+
+    @patch("httpx.Client")
+    def test_delete_filter_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test delete filter handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.delete.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout deleting filter 10000"):
+            client.delete_filter(filter_id="10000")
+
+    @patch("httpx.Client")
+    def test_create_filter_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test create filter handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_response.text = "Bad request"
+        mock_response.json.return_value = {"errorMessages": ["Invalid JQL"], "errors": {}}
+
+        mock_client_instance = Mock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Validation error"):
+            client.create_filter(name="Test", jql="invalid")
+
+    @patch("httpx.Client")
+    def test_list_filters_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test list filters handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 403
+        mock_response.text = "Forbidden"
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Permission denied"):
+            client.list_filters()
+
+    @patch("httpx.Client")
+    def test_get_filter_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test get filter handles API errors."""
+        mock_request = Mock()
+        mock_request.url = "https://jira.test.com/rest/api/2/filter/10000"
+
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.text = "Not found"
+        mock_response.request = mock_request
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="filter.*does not exist"):
+            client.get_filter(filter_id="10000")
+
+    @patch("httpx.Client")
+    def test_update_filter_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update filter handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 403
+        mock_response.text = "Forbidden"
+
+        mock_client_instance = Mock()
+        mock_client_instance.put.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Permission denied"):
+            client.update_filter(filter_id="10000", name="Updated")
+
+    @patch("httpx.Client")
+    def test_delete_filter_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test delete filter handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 403
+        mock_response.text = "Forbidden"
+
+        mock_client_instance = Mock()
+        mock_client_instance.delete.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Permission denied"):
+            client.delete_filter(filter_id="10000")

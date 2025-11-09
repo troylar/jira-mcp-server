@@ -11,12 +11,15 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 - ✅ **Health Check**: Verify connectivity and authentication
 - ✅ **Schema Introspection**: Debug tool to explore available fields
 
-### v0.2.0 - Latest
+### v0.2.0
 - ✅ **Robust Search**: Search issues by project, assignee, status, priority, labels, and date ranges
 - ✅ **JQL Support**: Execute raw JQL queries directly with full Jira Query Language support
 
+### v0.3.0 - Latest
+- ✅ **Custom Filters**: Save and reuse complex search queries with full CRUD operations
+- ✅ **Filter Execution**: Run saved filters with pagination support
+
 ### Coming Soon
-- 🔜 **Custom Filters**: Save and reuse complex search queries (v0.3.0)
 - 🔜 **Workflow Transitions**: Move issues through workflow states (v0.4.0)
 - 🔜 **Comment Management**: Add and retrieve issue comments (v0.5.0)
 
@@ -184,6 +187,36 @@ jira_search_jql(
 )
 ```
 
+### Manage Saved Filters
+
+```python
+# Create a filter
+filter_result = jira_filter_create(
+    name="My Open Issues",
+    jql="assignee = currentUser() AND status = Open",
+    description="All my open issues"
+)
+filter_id = filter_result["id"]
+
+# List all accessible filters
+filters = jira_filter_list()
+
+# Get filter details
+filter_details = jira_filter_get(filter_id="10000")
+
+# Execute a saved filter
+results = jira_filter_execute(filter_id="10000", max_results=20)
+
+# Update filter
+jira_filter_update(
+    filter_id="10000",
+    jql="assignee = currentUser() AND status IN (Open, 'In Progress')"
+)
+
+# Delete filter
+jira_filter_delete(filter_id="10000")
+```
+
 ## Configuration
 
 Environment variables:
@@ -251,21 +284,23 @@ ruff format src/ tests/
 - `jira_health_check` - Verify connection and authentication status
 - `jira_project_get_schema` - Get project schema for debugging (shows all available fields, types, and validation rules)
 
-### v0.2.0 - Latest
+### v0.2.0
 
 #### Search
 - `jira_search_issues` - Search with multiple criteria (project, assignee, status, priority, labels, date ranges)
 - `jira_search_jql` - Execute JQL queries directly with full Jira Query Language support
 
-### Coming in Future Releases
+### v0.3.0 - Latest
 
-#### Filters (v0.3.0)
-- `jira_filter_create` - Create custom filter
+#### Filters
+- `jira_filter_create` - Create custom filter with name and JQL query
 - `jira_filter_list` - List all accessible filters
-- `jira_filter_get` - Get filter details
-- `jira_filter_execute` - Run a saved filter
-- `jira_filter_update` - Update filter criteria
-- `jira_filter_delete` - Delete a filter
+- `jira_filter_get` - Get filter details by ID
+- `jira_filter_execute` - Run a saved filter with pagination support
+- `jira_filter_update` - Update filter criteria (name, JQL, description)
+- `jira_filter_delete` - Delete a filter (owner only)
+
+### Coming in Future Releases
 
 #### Workflows (v0.4.0)
 - `jira_workflow_get_transitions` - Get available transitions for an issue

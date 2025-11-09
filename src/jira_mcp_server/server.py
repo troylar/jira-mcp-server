@@ -7,6 +7,15 @@ from fastmcp import FastMCP
 
 from jira_mcp_server.config import JiraConfig
 from jira_mcp_server.jira_client import JiraClient
+from jira_mcp_server.tools.filter_tools import (
+    initialize_filter_tools,
+    jira_filter_create,
+    jira_filter_delete,
+    jira_filter_execute,
+    jira_filter_get,
+    jira_filter_list,
+    jira_filter_update,
+)
 from jira_mcp_server.tools.issue_tools import (
     _get_field_schema,
     initialize_issue_tools,
@@ -305,6 +314,156 @@ def jira_search_jql_tool(
     )
 
 
+# Register filter tools
+@mcp.tool()
+def jira_filter_create_tool(
+    name: str,
+    jql: str,
+    description: str | None = None,
+    favourite: bool = False,
+) -> Dict[str, Any]:
+    """Create a new saved filter for reusing complex search queries.
+
+    Filters allow you to save JQL queries for quick access to frequently-needed issue sets.
+
+    Args:
+        name: Filter name (required)
+        jql: JQL query string (required)
+        description: Optional filter description
+        favourite: Whether to mark as favorite (default: False)
+
+    Returns:
+        Created filter with ID and details
+
+    Example:
+        jira_filter_create_tool(
+            name="My Open Issues",
+            jql="assignee = currentUser() AND status = Open",
+            description="All my open issues"
+        )
+    """
+    return jira_filter_create(  # pragma: no cover
+        name=name,
+        jql=jql,
+        description=description,
+        favourite=favourite,
+    )
+
+
+@mcp.tool()
+def jira_filter_list_tool() -> Dict[str, Any]:
+    """List all accessible filters.
+
+    Returns all filters you have permission to view, including your own and shared filters.
+
+    Returns:
+        List of filter metadata (ID, name, JQL, owner)
+
+    Example:
+        jira_filter_list_tool()
+    """
+    return jira_filter_list()  # pragma: no cover
+
+
+@mcp.tool()
+def jira_filter_get_tool(filter_id: str) -> Dict[str, Any]:
+    """Get complete filter details by ID.
+
+    Args:
+        filter_id: Filter ID
+
+    Returns:
+        Complete filter information including JQL, owner, and permissions
+
+    Example:
+        jira_filter_get_tool(filter_id="10000")
+    """
+    return jira_filter_get(filter_id=filter_id)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_filter_execute_tool(
+    filter_id: str,
+    max_results: int = 50,
+    start_at: int = 0,
+) -> Dict[str, Any]:
+    """Execute a saved filter and return matching issues.
+
+    Retrieves the filter's JQL and executes it with pagination support.
+
+    Args:
+        filter_id: Filter ID
+        max_results: Maximum results to return (default: 50)
+        start_at: Starting offset for pagination (default: 0)
+
+    Returns:
+        Search results with total count, issues list, and pagination info
+
+    Example:
+        jira_filter_execute_tool(filter_id="10000", max_results=20)
+    """
+    return jira_filter_execute(  # pragma: no cover
+        filter_id=filter_id,
+        max_results=max_results,
+        start_at=start_at,
+    )
+
+
+@mcp.tool()
+def jira_filter_update_tool(
+    filter_id: str,
+    name: str | None = None,
+    jql: str | None = None,
+    description: str | None = None,
+    favourite: bool | None = None,
+) -> Dict[str, Any]:
+    """Update an existing filter.
+
+    Only provided fields are updated. At least one field must be provided.
+
+    Args:
+        filter_id: Filter ID
+        name: New filter name
+        jql: New JQL query
+        description: New description
+        favourite: Whether to mark as favorite
+
+    Returns:
+        Updated filter data
+
+    Example:
+        jira_filter_update_tool(
+            filter_id="10000",
+            jql="assignee = currentUser() AND status IN (Open, 'In Progress')"
+        )
+    """
+    return jira_filter_update(  # pragma: no cover
+        filter_id=filter_id,
+        name=name,
+        jql=jql,
+        description=description,
+        favourite=favourite,
+    )
+
+
+@mcp.tool()
+def jira_filter_delete_tool(filter_id: str) -> Dict[str, Any]:
+    """Delete a filter.
+
+    Only the filter owner can delete it.
+
+    Args:
+        filter_id: Filter ID
+
+    Returns:
+        Success confirmation message
+
+    Example:
+        jira_filter_delete_tool(filter_id="10000")
+    """
+    return jira_filter_delete(filter_id=filter_id)  # pragma: no cover
+
+
 def main() -> None:
     """Main entry point for the Jira MCP server."""
     try:
@@ -319,6 +478,9 @@ def main() -> None:
 
         # Initialize search tools
         initialize_search_tools(client)
+
+        # Initialize filter tools
+        initialize_filter_tools(client)
 
         print("Starting Jira MCP Server...")
         print(f"Jira URL: {config.jira_url}")

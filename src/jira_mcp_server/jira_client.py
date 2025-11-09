@@ -274,3 +274,156 @@ class JiraClient:
 
         except httpx.TimeoutException:
             raise ValueError("Timeout executing search query")
+
+    def create_filter(
+        self, name: str, jql: str, description: str | None = None, favourite: bool = False
+    ) -> Dict[str, Any]:
+        """Create a new saved filter.
+
+        Args:
+            name: Filter name
+            jql: JQL query string
+            description: Optional filter description
+            favourite: Whether to mark as favorite
+
+        Returns:
+            Created filter data
+
+        Raises:
+            ValueError: If filter creation fails
+        """
+        url = f"{self.base_url}/rest/api/2/filter"
+        data = {"name": name, "jql": jql, "favourite": favourite}
+        if description:
+            data["description"] = description
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(url, headers=self._get_headers(), json=data)
+
+                if response.status_code not in (200, 201):
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError("Timeout creating filter")
+
+    def list_filters(self) -> Dict[str, Any]:
+        """List all accessible filters.
+
+        Returns:
+            List of filter metadata
+
+        Raises:
+            ValueError: If filter listing fails
+        """
+        url = f"{self.base_url}/rest/api/2/filter/my"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.get(url, headers=self._get_headers())
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError("Timeout listing filters")
+
+    def get_filter(self, filter_id: str) -> Dict[str, Any]:
+        """Get filter details by ID.
+
+        Args:
+            filter_id: Filter ID
+
+        Returns:
+            Filter details
+
+        Raises:
+            ValueError: If filter not found or access denied
+        """
+        url = f"{self.base_url}/rest/api/2/filter/{filter_id}"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.get(url, headers=self._get_headers())
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout getting filter {filter_id}")
+
+    def update_filter(
+        self,
+        filter_id: str,
+        name: str | None = None,
+        jql: str | None = None,
+        description: str | None = None,
+        favourite: bool | None = None,
+    ) -> Dict[str, Any]:
+        """Update an existing filter.
+
+        Args:
+            filter_id: Filter ID
+            name: New filter name
+            jql: New JQL query
+            description: New description
+            favourite: Whether to mark as favorite
+
+        Returns:
+            Updated filter data
+
+        Raises:
+            ValueError: If filter update fails
+        """
+        url = f"{self.base_url}/rest/api/2/filter/{filter_id}"
+        data: Dict[str, Any] = {}
+        if name is not None:
+            data["name"] = name
+        if jql is not None:
+            data["jql"] = jql
+        if description is not None:
+            data["description"] = description
+        if favourite is not None:
+            data["favourite"] = favourite
+
+        if not data:
+            raise ValueError("At least one field must be provided to update")
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.put(url, headers=self._get_headers(), json=data)
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout updating filter {filter_id}")
+
+    def delete_filter(self, filter_id: str) -> None:
+        """Delete a filter.
+
+        Args:
+            filter_id: Filter ID
+
+        Raises:
+            ValueError: If filter deletion fails or permission denied
+        """
+        url = f"{self.base_url}/rest/api/2/filter/{filter_id}"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.delete(url, headers=self._get_headers())
+
+                if response.status_code != 204:
+                    self._handle_error(response)
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout deleting filter {filter_id}")
