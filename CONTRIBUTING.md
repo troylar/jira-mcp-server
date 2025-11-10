@@ -2,6 +2,39 @@
 
 Thank you for your interest in contributing to the Jira MCP Server! This document provides guidelines and instructions for contributing.
 
+## Table of Contents
+
+- [GitHub Issue Requirement](#github-issue-requirement)
+- [Development Setup](#development-setup)
+- [Development Workflow](#development-workflow)
+- [Code Style Guidelines](#code-style-guidelines)
+- [Testing Guidelines](#testing-guidelines)
+- [Pull Request Guidelines](#pull-request-guidelines)
+- [Release Process](#release-process)
+- [Getting Help](#getting-help)
+
+## GitHub Issue Requirement
+
+**CRITICAL: ALL work MUST be tied to a GitHub issue. No exceptions.**
+
+Before starting ANY work:
+
+1. **Check**: Does a GitHub issue exist for this work?
+2. **Create if missing**: Use `gh issue create` to create one with:
+   ```bash
+   gh issue create \
+     --title "Add attachment support" \
+     --label "enhancement" \
+     --body "Implement attachment upload/download functionality..."
+   ```
+3. **Reference in ALL commits**: Every commit MUST reference the issue number
+   - Format: `type(scope): description (#issue)`
+   - Example: `feat(comments): add comment edit functionality (#42)`
+4. **Reference in PRs**: Every PR MUST link to issues
+   - Use: `Closes #123`, `Fixes #456`, or `Addresses #789`
+
+**Rationale**: Issue tracking provides traceability, enables project planning, facilitates collaboration, and creates searchable history.
+
 ## Development Setup
 
 ### Prerequisites
@@ -15,9 +48,11 @@ Thank you for your interest in contributing to the Jira MCP Server! This documen
 1. **Fork and clone the repository**:
 
    ```bash
-   git clone https://github.com/yourusername/jira-mcp-server.git
+   git clone https://github.com/YOUR-USERNAME/jira-mcp-server.git
    cd jira-mcp-server
    ```
+
+   Replace `YOUR-USERNAME` with your GitHub username.
 
 2. **Create a virtual environment**:
 
@@ -45,19 +80,25 @@ Thank you for your interest in contributing to the Jira MCP Server! This documen
 
 ## Development Workflow
 
-### 1. Create a Branch
+### 1. Create an Issue
+
+Create or identify a GitHub issue before starting work (see [GitHub Issue Requirement](#github-issue-requirement)).
+
+### 2. Create a Branch
+
+Branch names should include the issue number:
 
 ```bash
-git checkout -b feature/your-feature-name
+git checkout -b issue-42-add-attachment-support
 # or
-git checkout -b fix/your-bug-fix
+git checkout -b issue-123-fix-cache-bug
 ```
 
-### 2. Make Your Changes
+### 3. Make Your Changes
 
 Follow the code style and testing guidelines below.
 
-### 3. Run Tests
+### 4. Run Tests
 
 ```bash
 # Run all tests with coverage
@@ -75,7 +116,7 @@ pytest --no-cov
 
 **All tests must pass and coverage must remain at 100%.**
 
-### 4. Code Quality Checks
+### 5. Code Quality Checks
 
 ```bash
 # Type checking
@@ -88,19 +129,24 @@ ruff format src/ tests/
 
 All checks must pass before submitting a PR.
 
-### 5. Commit Your Changes
+### 6. Commit Your Changes
 
-Use conventional commit messages:
+Use conventional commit messages with issue numbers (required):
 
 ```
-feat: add support for attachments
-fix: resolve caching issue with custom fields
-docs: update installation instructions
-test: add tests for schema validation
-refactor: simplify error handling logic
+feat(comments): add support for attachments (#42)
+fix(cache): resolve caching issue with custom fields (#123)
+docs: update installation instructions (#89)
+test(validation): add tests for schema validation (#101)
+refactor(client): simplify error handling logic (#67)
 ```
 
-### 6. Push and Create Pull Request
+**Commit format**: `type(scope): description (#issue)`
+
+**Types**: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `perf`
+**Scope**: Module name (e.g., `comments`, `search`, `filters`, `workflows`, `client`)
+
+### 7. Push and Create Pull Request
 
 ```bash
 git push origin your-branch-name
@@ -341,17 +387,20 @@ We use Semantic Versioning (SemVer):
 
 ## Release Process
 
-1. Update version in `pyproject.toml`
-2. Update `CHANGELOG.md` (if exists)
-3. Create git tag: `git tag v0.2.0`
-4. Push tag: `git push origin v0.2.0`
-5. GitHub Actions will build and publish to PyPI
+Releases are managed by project maintainers:
+
+1. **Update Version**: Update `version` in `pyproject.toml`
+2. **Update Changelog**: Add release notes to `CHANGELOG.md`
+3. **Commit Changes**: `git commit -m "chore: release v0.6.0 (#N)"`
+4. **Create Release**: Create GitHub release with tag (e.g., `v0.6.0`)
+5. **Automated Publishing**: GitHub Actions automatically publishes to PyPI using trusted publishing
+6. **Verify**: Check [PyPI package](https://pypi.org/project/jira-mcp-server/) and test installation
 
 ## Getting Help
 
-- **Questions**: Open a [GitHub Discussion](https://github.com/yourusername/jira-mcp-server/discussions)
-- **Bugs**: Open a [GitHub Issue](https://github.com/yourusername/jira-mcp-server/issues)
-- **Security**: Email security@yourcompany.com (do not open public issues)
+- **Questions**: Open a [GitHub Discussion](https://github.com/troylar/jira-mcp-server/discussions)
+- **Bugs**: Open a [GitHub Issue](https://github.com/troylar/jira-mcp-server/issues)
+- **Documentation**: See [README.md](README.md) and [CHANGELOG.md](CHANGELOG.md)
 
 ## Code of Conduct
 
