@@ -1121,3 +1121,99 @@ class TestJiraClient:
 
         with pytest.raises(ValueError, match="issue.*does not exist"):
             client.list_comments(issue_key="PROJ-999")
+
+    @patch("httpx.Client")
+    def test_update_comment_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test updating a comment."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "id": "10001",
+            "body": "Updated comment",
+            "author": {"displayName": "John Doe"},
+            "updated": "2025-01-15T12:00:00.000+0000",
+        }
+
+        mock_client_instance = Mock()
+        mock_client_instance.put.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        result = client.update_comment(issue_key="PROJ-123", comment_id="10001", body="Updated comment")
+
+        assert result["id"] == "10001"
+        assert result["body"] == "Updated comment"
+
+    @patch("httpx.Client")
+    def test_update_comment_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update comment handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.put.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout updating comment 10001 on issue PROJ-123"):
+            client.update_comment(issue_key="PROJ-123", comment_id="10001", body="Updated")
+
+    @patch("httpx.Client")
+    def test_update_comment_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test update comment handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 403
+        mock_response.text = "Forbidden"
+
+        mock_client_instance = Mock()
+        mock_client_instance.put.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Permission denied"):
+            client.update_comment(issue_key="PROJ-123", comment_id="10001", body="Updated")
+
+    @patch("httpx.Client")
+    def test_delete_comment_success(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test deleting a comment."""
+        mock_response = Mock()
+        mock_response.status_code = 204
+
+        mock_client_instance = Mock()
+        mock_client_instance.delete.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+        client.delete_comment(issue_key="PROJ-123", comment_id="10001")
+
+        # No exception means success
+
+    @patch("httpx.Client")
+    def test_delete_comment_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test delete comment handles timeout."""
+        mock_client_instance = Mock()
+        mock_client_instance.delete.side_effect = httpx.TimeoutException("Timed out")
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Timeout deleting comment 10001 on issue PROJ-123"):
+            client.delete_comment(issue_key="PROJ-123", comment_id="10001")
+
+    @patch("httpx.Client")
+    def test_delete_comment_error(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test delete comment handles API errors."""
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.text = "Not found"
+        mock_request = Mock()
+        mock_request.url = "https://jira.test.com/rest/api/2/issue/PROJ-123/comment/10001"
+        mock_response.request = mock_request
+
+        mock_client_instance = Mock()
+        mock_client_instance.delete.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="does not exist"):
+            client.delete_comment(issue_key="PROJ-123", comment_id="10001")

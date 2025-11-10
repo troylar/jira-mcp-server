@@ -10,7 +10,9 @@ from jira_mcp_server.jira_client import JiraClient
 from jira_mcp_server.tools.comment_tools import (
     initialize_comment_tools,
     jira_comment_add,
+    jira_comment_delete,
     jira_comment_list,
+    jira_comment_update,
 )
 from jira_mcp_server.tools.filter_tools import (
     initialize_filter_tools,
@@ -566,6 +568,49 @@ def jira_comment_list_tool(issue_key: str) -> Dict[str, Any]:
         jira_comment_list_tool(issue_key="PROJ-123")
     """
     return jira_comment_list(issue_key=issue_key)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_comment_update_tool(issue_key: str, comment_id: str, body: str) -> Dict[str, Any]:
+    """Update an existing comment.
+
+    Only the comment author or users with appropriate permissions can update a comment.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+        comment_id: Comment ID to update
+        body: New comment text (supports Jira markup)
+
+    Returns:
+        Updated comment with ID, author, and timestamp
+
+    Example:
+        jira_comment_update_tool(
+            issue_key="PROJ-123",
+            comment_id="10001",
+            body="Updated comment text"
+        )
+    """
+    return jira_comment_update(issue_key=issue_key, comment_id=comment_id, body=body)  # pragma: no cover
+
+
+@mcp.tool()
+def jira_comment_delete_tool(issue_key: str, comment_id: str) -> Dict[str, Any]:
+    """Delete a comment.
+
+    Only the comment author or users with appropriate permissions can delete a comment.
+
+    Args:
+        issue_key: Issue key (e.g., "PROJ-123")
+        comment_id: Comment ID to delete
+
+    Returns:
+        Success confirmation with deleted comment ID
+
+    Example:
+        jira_comment_delete_tool(issue_key="PROJ-123", comment_id="10001")
+    """
+    return jira_comment_delete(issue_key=issue_key, comment_id=comment_id)  # pragma: no cover
 
 
 def main() -> None:

@@ -533,3 +533,54 @@ class JiraClient:
 
         except httpx.TimeoutException:
             raise ValueError(f"Timeout listing comments for issue {issue_key}")
+
+    def update_comment(self, issue_key: str, comment_id: str, body: str) -> Dict[str, Any]:
+        """Update an existing comment.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+            comment_id: Comment ID to update
+            body: New comment text
+
+        Returns:
+            Updated comment data
+
+        Raises:
+            ValueError: If comment not found or permission denied
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment/{comment_id}"
+        data = {"body": body}
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.put(url, headers=self._get_headers(), json=data)
+
+                if response.status_code != 200:
+                    self._handle_error(response)
+
+                return response.json()  # type: ignore[no-any-return]
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout updating comment {comment_id} on issue {issue_key}")
+
+    def delete_comment(self, issue_key: str, comment_id: str) -> None:
+        """Delete a comment.
+
+        Args:
+            issue_key: Issue key (e.g., "PROJ-123")
+            comment_id: Comment ID to delete
+
+        Raises:
+            ValueError: If comment not found or permission denied
+        """
+        url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment/{comment_id}"
+
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.delete(url, headers=self._get_headers())
+
+                if response.status_code != 204:
+                    self._handle_error(response)
+
+        except httpx.TimeoutException:
+            raise ValueError(f"Timeout deleting comment {comment_id} on issue {issue_key}")

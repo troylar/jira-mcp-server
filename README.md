@@ -24,8 +24,9 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 - ✅ **Transition Discovery**: Get available transitions for any issue
 
 ### v0.5.0 - Latest
-- ✅ **Comment Management**: Add and retrieve issue comments
-- ✅ **Full Comment Support**: Supports Jira markup formatting
+- ✅ **Comment Management**: Full CRUD operations for issue comments (add, list, update, delete)
+- ✅ **Comment Permissions**: Author and admin permission controls for update/delete
+- ✅ **Jira Markup Support**: Full support for Jira text formatting in comments
 
 ## Requirements
 
@@ -292,6 +293,28 @@ comments = jira_comment_list(issue_key="PROJ-123")
 #   ],
 #   "total": 2
 # }
+
+# Update an existing comment
+updated = jira_comment_update(
+    issue_key="PROJ-123",
+    comment_id="10001",
+    body="Updated comment text"
+)
+# Returns: {
+#   "id": "10001",
+#   "body": "Updated comment text",
+#   "author": {"displayName": "John Doe"},
+#   "updated": "2025-01-15T12:00:00.000+0000"
+# }
+
+# Delete a comment
+result = jira_comment_delete(issue_key="PROJ-123", comment_id="10001")
+# Returns: {
+#   "success": true,
+#   "message": "Comment 10001 deleted successfully",
+#   "issue_key": "PROJ-123",
+#   "comment_id": "10001"
+# }
 ```
 
 ## Configuration
@@ -385,9 +408,11 @@ ruff format src/ tests/
 
 ### v0.5.0 - Latest
 
-#### Comments
+#### Comments (Full CRUD)
 - `jira_comment_add` - Add comment to an issue (supports Jira markup)
 - `jira_comment_list` - List all comments on an issue with author and timestamp info
+- `jira_comment_update` - Update an existing comment (author or admin only)
+- `jira_comment_delete` - Delete a comment (author or admin only)
 
 ## Troubleshooting
 
