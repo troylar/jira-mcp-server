@@ -200,7 +200,7 @@ class TestJiraClient:
 
         client = JiraClient(mock_config)
 
-        with pytest.raises(ValueError, match="Project.*not found"):
+        with pytest.raises(ValueError, match="Project.*returned no data"):
             client.get_project_schema("INVALID", "Bug")
 
     @patch("httpx.Client")
@@ -218,6 +218,21 @@ class TestJiraClient:
 
         with pytest.raises(ValueError, match="Issue type.*not found"):
             client.get_project_schema("PROJ", "InvalidType")
+
+    @patch("httpx.Client")
+    def test_get_project_schema_404_response(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:
+        """Test getting schema when createmeta endpoint returns 404."""
+        mock_response = Mock()
+        mock_response.status_code = 404
+
+        mock_client_instance = Mock()
+        mock_client_instance.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client_instance
+
+        client = JiraClient(mock_config)
+
+        with pytest.raises(ValueError, match="Project schema not found"):
+            client.get_project_schema("PROJ", "Bug")
 
     @patch("httpx.Client")
     def test_get_project_schema_timeout(self, mock_client_class: Mock, mock_config: JiraConfig) -> None:

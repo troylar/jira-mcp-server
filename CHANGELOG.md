@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2025-01-12
+
+### Improved
+- **Enhanced Error Messages** - Much more detailed error messages for project schema fetch failures
+  - 404 errors now explain possible causes (project not found, permission denied, endpoint unavailable)
+  - Empty project data errors provide actionable troubleshooting steps
+  - Issue type not found errors list common types and note case-sensitivity
+  - Better diagnostic information to help users resolve configuration issues
+- Added test coverage for 404 endpoint response handling (342 total tests with 100% coverage)
+
+### Changed
+- Updated error handling in `JiraClient.get_project_schema()` with context-specific messages
+- Improved user experience when diagnosing Jira connection and permission issues
+
 ## [0.6.1] - 2025-01-12
 
 ### Fixed

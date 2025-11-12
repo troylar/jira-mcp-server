@@ -228,18 +228,36 @@ class JiraClient:
             with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers(), params=params)
 
-                if response.status_code != 200:
+                if response.status_code == 404:
+                    raise ValueError(
+                        f"Project schema not found. Possible causes:\n"
+                        f"  - Project '{project_key}' does not exist\n"
+                        f"  - You don't have permission to access project '{project_key}'\n"
+                        f"  - Issue type '{issue_type}' is not available in this project\n"
+                        f"  - The createmeta endpoint may not be available in your Jira version\n"
+                        f"Please verify the project key and issue type are correct."
+                    )
+                elif response.status_code != 200:
                     self._handle_error(response)
 
                 data = response.json()
                 projects = data.get("projects", [])
 
                 if not projects:
-                    raise ValueError(f"Project {project_key} not found or no issue types available")
+                    raise ValueError(
+                        f"Project '{project_key}' returned no data. Possible causes:\n"
+                        f"  - Project exists but you don't have permission to create issues\n"
+                        f"  - Issue type '{issue_type}' is not available in this project\n"
+                        f"Available projects: Check with your Jira administrator"
+                    )
 
                 issue_types = projects[0].get("issuetypes", [])
                 if not issue_types:
-                    raise ValueError(f"Issue type {issue_type} not found in project {project_key}")
+                    raise ValueError(
+                        f"Issue type '{issue_type}' not found in project '{project_key}'.\n"
+                        f"Common issue types: Task, Bug, Story, Epic\n"
+                        f"Note: Issue type names are case-sensitive"
+                    )
 
                 fields = issue_types[0].get("fields", {})
                 return [{"key": k, **v} for k, v in fields.items()]
