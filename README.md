@@ -510,7 +510,7 @@ Or in your AI assistant configuration:
 }
 ```
 
-**⚠️ Security Warning**: Disabling SSL verification should only be used for testing with self-signed certificates or internal development. Never use this in production environments as it makes your connection vulnerable to man-in-the-middle attacks.
+**Security Warning**: Disabling SSL verification should only be used for testing with self-signed certificates or internal development. Never use this in production environments as it makes your connection vulnerable to man-in-the-middle attacks.
 
 ## Development
 
