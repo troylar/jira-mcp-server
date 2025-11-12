@@ -17,6 +17,7 @@ class TestJiraConfig:
         assert config.token == "test-token-123"
         assert config.cache_ttl == 3600  # Default
         assert config.timeout == 30  # Default
+        assert config.verify_ssl is True  # Default
 
     def test_config_uses_custom_values(self) -> None:
         """Test that config accepts custom TTL and timeout values."""
@@ -84,3 +85,15 @@ class TestJiraConfig:
 
         assert config.url == "https://jira.example.com"
         assert not config.url.endswith("/")
+
+    def test_config_verify_ssl_default_true(self) -> None:
+        """Test that SSL verification is enabled by default."""
+        config = JiraConfig(url="https://jira.example.com", token="test-token-123")
+
+        assert config.verify_ssl is True
+
+    def test_config_verify_ssl_can_be_disabled(self) -> None:
+        """Test that SSL verification can be disabled for testing."""
+        config = JiraConfig(url="https://jira.example.com", token="test-token-123", verify_ssl=False)
+
+        assert config.verify_ssl is False

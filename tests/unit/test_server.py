@@ -66,12 +66,49 @@ class TestMain:
         mock_config.url = "https://jira.test.com"
         mock_config.cache_ttl = 3600
         mock_config.timeout = 30
+        mock_config.verify_ssl = True
         mock_config_class.return_value = mock_config
 
         server.main()
 
         mock_initialize.assert_called_once_with(mock_config)
         mock_mcp_run.assert_called_once()
+
+    @patch("jira_mcp_server.server.mcp.run")
+    @patch("jira_mcp_server.server.initialize_issue_tools")
+    @patch("jira_mcp_server.server.initialize_search_tools")
+    @patch("jira_mcp_server.server.initialize_filter_tools")
+    @patch("jira_mcp_server.server.initialize_workflow_tools")
+    @patch("jira_mcp_server.server.initialize_comment_tools")
+    @patch("jira_mcp_server.server.JiraClient")
+    @patch("jira_mcp_server.server.JiraConfig")
+    @patch("builtins.print")
+    def test_main_with_ssl_disabled_shows_warning(
+        self,
+        mock_print: Mock,
+        mock_config_class: Mock,
+        mock_client_class: Mock,
+        mock_init_comment: Mock,
+        mock_init_workflow: Mock,
+        mock_init_filter: Mock,
+        mock_init_search: Mock,
+        mock_init_issue: Mock,
+        mock_mcp_run: Mock,
+    ) -> None:
+        """Test that SSL warning is displayed when verification is disabled."""
+        mock_config = Mock()
+        mock_config.url = "https://jira.test.com"
+        mock_config.cache_ttl = 3600
+        mock_config.timeout = 30
+        mock_config.verify_ssl = False
+        mock_config_class.return_value = mock_config
+
+        server.main()
+
+        # Verify warning message was printed
+        warning_calls = [str(call) for call in mock_print.call_args_list]
+        warning_found = any("WARNING" in str(call) and "SSL" in str(call) for call in warning_calls)
+        assert warning_found, "Expected SSL warning message to be printed"
 
     @patch("jira_mcp_server.server.JiraConfig")
     @patch("builtins.print")

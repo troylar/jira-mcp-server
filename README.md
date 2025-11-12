@@ -483,6 +483,34 @@ Environment variables:
 - `JIRA_MCP_TOKEN` (required): API authentication token
 - `JIRA_MCP_CACHE_TTL` (optional, default: 3600): Schema cache TTL in seconds
 - `JIRA_MCP_TIMEOUT` (optional, default: 30): HTTP request timeout in seconds
+- `JIRA_MCP_VERIFY_SSL` (optional, default: true): Verify SSL certificates
+
+### SSL Certificate Verification
+
+By default, the server verifies SSL certificates. For testing with self-signed certificates, you can disable SSL verification:
+
+```bash
+export JIRA_MCP_VERIFY_SSL="false"
+```
+
+Or in your AI assistant configuration:
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "fastmcp-jira-server",
+      "env": {
+        "JIRA_MCP_URL": "https://jira.yourcompany.com",
+        "JIRA_MCP_TOKEN": "your-api-token-here",
+        "JIRA_MCP_VERIFY_SSL": "false"
+      }
+    }
+  }
+}
+```
+
+**⚠️ Security Warning**: Disabling SSL verification should only be used for testing with self-signed certificates or internal development. Never use this in production environments as it makes your connection vulnerable to man-in-the-middle attacks.
 
 ## Development
 

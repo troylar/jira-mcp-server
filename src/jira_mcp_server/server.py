@@ -641,6 +641,12 @@ def main() -> None:
         print(f"Jira URL: {config.url}")
         print(f"Cache TTL: {config.cache_ttl}s")
         print(f"Timeout: {config.timeout}s")
+        print(f"SSL Verification: {'Enabled' if config.verify_ssl else 'DISABLED (Testing Only)'}")
+        if not config.verify_ssl:
+            print()
+            print("⚠️  WARNING: SSL certificate verification is DISABLED!")
+            print("   This should only be used for testing with self-signed certificates.")
+            print("   DO NOT use this in production environments.")
         print()
         print("Server ready! Use MCP client to interact with Jira.")
 
