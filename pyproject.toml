@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "jira-mcp-server"
+name = "fastmcp-jira-server"
 version = "0.5.0"
 description = "FastMCP server for self-hosted Jira with full CRUD operations, custom fields, JQL search, filters, workflows, and comments"
 readme = "README.md"
@@ -47,7 +47,7 @@ dev = [
 ]
 
 [project.scripts]
-jira-mcp-server = "jira_mcp_server.server:main"
+fastmcp-jira-server = "jira_mcp_server.server:main"
 
 [project.urls]
 Homepage = "https://github.com/troylar/jira-mcp-server"

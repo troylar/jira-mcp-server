@@ -1,7 +1,7 @@
 # Jira MCP Server
 
 [![CI](https://github.com/troylar/jira-mcp-server/workflows/CI/badge.svg)](https://github.com/troylar/jira-mcp-server/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/jira-mcp-server.svg)](https://badge.fury.io/py/jira-mcp-server)
+[![PyPI version](https://badge.fury.io/py/fastmcp-jira-server.svg)](https://badge.fury.io/py/fastmcp-jira-server)
 [![codecov](https://codecov.io/gh/troylar/jira-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/troylar/jira-mcp-server)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -43,7 +43,7 @@ A FastMCP server that enables AI assistants to interact with self-hosted Jira in
 ## Installation
 
 ```bash
-pip install jira-mcp-server
+pip install fastmcp-jira-server
 ```
 
 ## Quick Start
@@ -70,7 +70,7 @@ pip install jira-mcp-server
 3. **Run the server**:
 
    ```bash
-   jira-mcp-server
+   fastmcp-jira-server
    ```
 
 4. **Verify connection**:

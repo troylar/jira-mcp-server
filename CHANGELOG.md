@@ -122,6 +122,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Links
 
 - [GitHub Repository](https://github.com/troylar/jira-mcp-server)
-- [PyPI Package](https://pypi.org/project/jira-mcp-server/)
+- [PyPI Package](https://pypi.org/project/fastmcp-jira-server/)
 - [Documentation](https://github.com/troylar/jira-mcp-server#readme)
 - [Issues](https://github.com/troylar/jira-mcp-server/issues)

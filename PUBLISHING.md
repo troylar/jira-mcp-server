@@ -1,6 +1,6 @@
 # Publishing to PyPI
 
-This document describes how to publish the jira-mcp-server package to PyPI.
+This document describes how to publish the fastmcp-jira-server package to PyPI.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ This method uses GitHub Actions with trusted publishing (no API tokens needed).
 1. Go to https://pypi.org/manage/account/publishing/
 2. Click "Add a new publisher"
 3. Fill in:
-   - **PyPI Project Name**: `jira-mcp-server`
+   - **PyPI Project Name**: `fastmcp-jira-server`
    - **Owner**: `troylar`
    - **Repository name**: `jira-mcp-server`
    - **Workflow name**: `publish.yml`
@@ -115,10 +115,10 @@ After publishing, verify the package:
 
 ```bash
 # Install from PyPI
-pip install jira-mcp-server
+pip install fastmcp-jira-server
 
 # Verify it works
-jira-mcp-server --help
+fastmcp-jira-server --help
 
 # Or in Python
 python -c "import jira_mcp_server; print(jira_mcp_server.__version__)"
@@ -147,7 +147,7 @@ python -c "import jira_mcp_server; print(jira_mcp_server.__version__)"
 ### Package Not Found After Publishing
 
 - PyPI indexing can take a few minutes
-- Check the package page: https://pypi.org/project/jira-mcp-server/
+- Check the package page: https://pypi.org/project/fastmcp-jira-server/
 - Clear pip cache: `pip cache purge`
 
 ## Security Best Practices
@@ -161,7 +161,7 @@ python -c "import jira_mcp_server; print(jira_mcp_server.__version__)"
 
 The package metadata is defined in `pyproject.toml`:
 
-- **Name**: jira-mcp-server
+- **Name**: fastmcp-jira-server
 - **Version**: 0.5.0
 - **Python**: >=3.10
 - **License**: MIT
@@ -179,7 +179,7 @@ Before creating a release:
 - [ ] CI passing on GitHub
 - [ ] Create GitHub release with tag
 - [ ] Verify package on PyPI after publish
-- [ ] Test installation: `pip install jira-mcp-server`
+- [ ] Test installation: `pip install fastmcp-jira-server`
 
 ## Support
 
