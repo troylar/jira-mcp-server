@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-01-12
+
+### Added
+- **SSL Verification Control** - Optional SSL certificate verification disable for self-signed certificates
+  - `JIRA_MCP_VERIFY_SSL` environment variable (defaults to `true` for security)
+  - Security warning displayed when SSL verification is disabled
+  - Comprehensive documentation with security best practices
+- 3 new tests for SSL verification configuration (341 total tests with 100% coverage)
+
+### Changed
+- Updated README with SSL configuration section and security warnings
+- Enhanced JiraClient to support SSL verification control
+- Improved startup messages to indicate SSL verification status
+
+### Security
+- SSL verification enabled by default to ensure secure connections
+- Clear warnings when verification is disabled
+- Documentation emphasizes testing/development use only
+
+## [0.5.1] - 2025-01-12
+
+### Fixed
+- **Critical Bug**: Environment variable loading issue where `JIRA_MCP_URL` and `JIRA_MCP_TOKEN` were not recognized
+  - Changed field names in JiraConfig from `jira_url`/`jira_token` to `url`/`token`
+  - Fixed all code and test references to use new field names
+  - Package is now fully functional with documented environment variables
+
 ## [0.5.0] - 2025-01-15
 
 ### Added
