@@ -77,6 +77,112 @@ pip install fastmcp-jira-server
 
    Use the `jira_health_check` tool through your MCP client to verify the connection.
 
+## Using with AI Assistants
+
+The FastMCP Jira Server can be used with any MCP-compatible AI assistant. Below are configuration instructions for popular tools.
+
+### Claude Desktop
+
+Add to your Claude Desktop configuration file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "fastmcp-jira-server",
+      "env": {
+        "JIRA_MCP_URL": "https://jira.yourcompany.com",
+        "JIRA_MCP_TOKEN": "your-api-token-here"
+      }
+    }
+  }
+}
+```
+
+After updating the config, restart Claude Desktop. The Jira tools will appear in the MCP tools menu.
+
+### Cline (VS Code Extension)
+
+Add to your Cline MCP settings (`~/.cline/mcp_settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "fastmcp-jira-server",
+      "env": {
+        "JIRA_MCP_URL": "https://jira.yourcompany.com",
+        "JIRA_MCP_TOKEN": "your-api-token-here"
+      }
+    }
+  }
+}
+```
+
+Restart VS Code after updating the configuration.
+
+### Windsurf
+
+Add to your Windsurf configuration:
+
+**macOS/Linux**: `~/.windsurf/mcp_config.json`
+**Windows**: `%USERPROFILE%\.windsurf\mcp_config.json`
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "fastmcp-jira-server",
+      "env": {
+        "JIRA_MCP_URL": "https://jira.yourcompany.com",
+        "JIRA_MCP_TOKEN": "your-api-token-here"
+      }
+    }
+  }
+}
+```
+
+Restart Windsurf to load the new configuration.
+
+### Cursor
+
+Add to your Cursor MCP settings:
+
+**macOS**: `~/Library/Application Support/Cursor/User/globalStorage/mcp.json`
+**Windows**: `%APPDATA%\Cursor\User\globalStorage\mcp.json`
+**Linux**: `~/.config/Cursor/User/globalStorage/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "fastmcp-jira-server",
+      "env": {
+        "JIRA_MCP_URL": "https://jira.yourcompany.com",
+        "JIRA_MCP_TOKEN": "your-api-token-here"
+      }
+    }
+  }
+}
+```
+
+Restart Cursor after updating the configuration.
+
+### GitHub Copilot
+
+GitHub Copilot does not currently support MCP servers. For Copilot integration, consider using the Jira REST API directly or use one of the MCP-compatible tools above.
+
+### Verification
+
+After configuration, test the connection by asking your AI assistant:
+
+> "Use the jira_health_check tool to verify the Jira connection"
+
+You should see a response confirming the connection status and server version.
+
 ## Usage Examples
 
 ### Check Health
