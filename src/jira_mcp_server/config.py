@@ -14,12 +14,14 @@ class JiraConfig(BaseSettings):
     Optional environment variables:
     - JIRA_MCP_CACHE_TTL: Schema cache TTL in seconds (default: 3600)
     - JIRA_MCP_TIMEOUT: HTTP request timeout in seconds (default: 30)
+    - JIRA_MCP_VERIFY_SSL: Verify SSL certificates (default: true, set to false for self-signed certs)
     """
 
     url: str = Field(..., description="Jira instance URL")
     token: str = Field(..., description="API authentication token")
     cache_ttl: int = Field(default=3600, description="Schema cache TTL in seconds", gt=0)
     timeout: int = Field(default=30, description="HTTP request timeout in seconds", gt=0)
+    verify_ssl: bool = Field(default=True, description="Verify SSL certificates (disable for self-signed certs)")
 
     model_config = SettingsConfigDict(
         env_prefix="JIRA_MCP_",

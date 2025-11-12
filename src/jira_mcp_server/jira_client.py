@@ -22,6 +22,7 @@ class JiraClient:
         self.base_url = config.url
         self.timeout = config.timeout
         self._token = config.token
+        self.verify_ssl = config.verify_ssl
 
     def _get_headers(self) -> Dict[str, str]:
         """Get HTTP headers with authentication.
@@ -107,7 +108,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/serverInfo"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -142,7 +143,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue/{issue_key}"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -170,7 +171,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.post(url, headers=self._get_headers(), json=issue_data)
 
                 if response.status_code not in (200, 201):
@@ -194,7 +195,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue/{issue_key}"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.put(url, headers=self._get_headers(), json=update_data)
 
                 if response.status_code not in (200, 204):
@@ -224,7 +225,7 @@ class JiraClient:
         }
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers(), params=params)
 
                 if response.status_code != 200:
@@ -264,7 +265,7 @@ class JiraClient:
         data = {"jql": jql, "maxResults": max_results, "startAt": start_at}
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.post(url, headers=self._get_headers(), json=data)
 
                 if response.status_code != 200:
@@ -298,7 +299,7 @@ class JiraClient:
             data["description"] = description
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.post(url, headers=self._get_headers(), json=data)
 
                 if response.status_code not in (200, 201):
@@ -321,7 +322,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/filter/my"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -347,7 +348,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/filter/{filter_id}"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -396,7 +397,7 @@ class JiraClient:
             raise ValueError("At least one field must be provided to update")
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.put(url, headers=self._get_headers(), json=data)
 
                 if response.status_code != 200:
@@ -419,7 +420,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/filter/{filter_id}"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.delete(url, headers=self._get_headers())
 
                 if response.status_code != 204:
@@ -443,7 +444,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue/{issue_key}/transitions"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -471,7 +472,7 @@ class JiraClient:
             data["fields"] = fields
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.post(url, headers=self._get_headers(), json=data)
 
                 if response.status_code != 204:
@@ -497,7 +498,7 @@ class JiraClient:
         data = {"body": body}
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.post(url, headers=self._get_headers(), json=data)
 
                 if response.status_code not in (200, 201):
@@ -523,7 +524,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.get(url, headers=self._get_headers())
 
                 if response.status_code != 200:
@@ -552,7 +553,7 @@ class JiraClient:
         data = {"body": body}
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.put(url, headers=self._get_headers(), json=data)
 
                 if response.status_code != 200:
@@ -576,7 +577,7 @@ class JiraClient:
         url = f"{self.base_url}/rest/api/2/issue/{issue_key}/comment/{comment_id}"
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, verify=self.verify_ssl) as client:
                 response = client.delete(url, headers=self._get_headers())
 
                 if response.status_code != 204:
