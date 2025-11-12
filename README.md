@@ -171,9 +171,55 @@ Add to your Cursor MCP settings:
 
 Restart Cursor after updating the configuration.
 
-### GitHub Copilot
+### GitHub Copilot (VS Code)
 
-GitHub Copilot does not currently support MCP servers. For Copilot integration, consider using the Jira REST API directly or use one of the MCP-compatible tools above.
+**Requirements**: VS Code 1.99+ and GitHub Copilot with MCP policy enabled
+
+Create `.vscode/mcp.json` in your project root:
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString"
+    }
+  ],
+  "servers": {
+    "jira": {
+      "command": "fastmcp-jira-server"
+    }
+  }
+}
+```
+
+**Environment Variables**: Set these in your shell before starting VS Code:
+
+```bash
+export JIRA_MCP_URL="https://jira.yourcompany.com"
+export JIRA_MCP_TOKEN="your-api-token-here"
+code .
+```
+
+Or add to your VS Code `settings.json`:
+
+```json
+{
+  "terminal.integrated.env.osx": {
+    "JIRA_MCP_URL": "https://jira.yourcompany.com",
+    "JIRA_MCP_TOKEN": "your-api-token-here"
+  },
+  "terminal.integrated.env.linux": {
+    "JIRA_MCP_URL": "https://jira.yourcompany.com",
+    "JIRA_MCP_TOKEN": "your-api-token-here"
+  },
+  "terminal.integrated.env.windows": {
+    "JIRA_MCP_URL": "https://jira.yourcompany.com",
+    "JIRA_MCP_TOKEN": "your-api-token-here"
+  }
+}
+```
+
+After saving `.vscode/mcp.json`, click the "Start" button that appears at the top of the file. Access the Jira tools through Copilot Chat in **Agent** mode by clicking the tools icon.
 
 ### Verification
 
