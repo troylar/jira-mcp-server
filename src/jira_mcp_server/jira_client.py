@@ -19,9 +19,9 @@ class JiraClient:
         Args:
             config: JiraConfig with URL and authentication token
         """
-        self.base_url = config.jira_url
+        self.base_url = config.url
         self.timeout = config.timeout
-        self._token = config.jira_token
+        self._token = config.token
 
     def _get_headers(self) -> Dict[str, str]:
         """Get HTTP headers with authentication.

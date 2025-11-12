@@ -16,8 +16,8 @@ class JiraConfig(BaseSettings):
     - JIRA_MCP_TIMEOUT: HTTP request timeout in seconds (default: 30)
     """
 
-    jira_url: str = Field(..., description="Jira instance URL")
-    jira_token: str = Field(..., description="API authentication token")
+    url: str = Field(..., description="Jira instance URL")
+    token: str = Field(..., description="API authentication token")
     cache_ttl: int = Field(default=3600, description="Schema cache TTL in seconds", gt=0)
     timeout: int = Field(default=30, description="HTTP request timeout in seconds", gt=0)
 
@@ -27,7 +27,7 @@ class JiraConfig(BaseSettings):
         extra="ignore",  # Ignore extra fields
     )
 
-    @field_validator("jira_url")
+    @field_validator("url")
     @classmethod
     def remove_trailing_slash(cls, v: str) -> str:
         """Remove trailing slash from URL for consistency."""

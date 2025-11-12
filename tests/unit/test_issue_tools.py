@@ -19,7 +19,7 @@ from jira_mcp_server.tools.issue_tools import (
 @pytest.fixture
 def mock_config() -> JiraConfig:
     """Create a test configuration."""
-    return JiraConfig(jira_url="https://jira.test.com", jira_token="test-token")
+    return JiraConfig(url="https://jira.test.com", token="test-token")
 
 
 @pytest.fixture
@@ -210,7 +210,7 @@ class TestIssueUpdate:
 
     def setup_method(self) -> None:
         """Setup for each test."""
-        config = JiraConfig(jira_url="https://jira.test.com", jira_token="test-token")
+        config = JiraConfig(url="https://jira.test.com", token="test-token")
         initialize_issue_tools(config)
 
     @patch("jira_mcp_server.tools.issue_tools._client", None)
@@ -283,7 +283,7 @@ class TestIssueGet:
 
     def setup_method(self) -> None:
         """Setup for each test."""
-        config = JiraConfig(jira_url="https://jira.test.com", jira_token="test-token")
+        config = JiraConfig(url="https://jira.test.com", token="test-token")
         initialize_issue_tools(config)
 
     @patch("jira_mcp_server.tools.issue_tools._client", None)
@@ -324,7 +324,7 @@ class TestGetFieldSchema:
 
     def setup_method(self) -> None:
         """Setup for each test."""
-        config = JiraConfig(jira_url="https://jira.test.com", jira_token="test-token")
+        config = JiraConfig(url="https://jira.test.com", token="test-token")
         initialize_issue_tools(config)
 
     @patch("jira_mcp_server.tools.issue_tools._client", None)

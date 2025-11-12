@@ -63,7 +63,7 @@ class TestMain:
     ) -> None:
         """Test successful server startup."""
         mock_config = Mock()
-        mock_config.jira_url = "https://jira.test.com"
+        mock_config.url = "https://jira.test.com"
         mock_config.cache_ttl = 3600
         mock_config.timeout = 30
         mock_config_class.return_value = mock_config

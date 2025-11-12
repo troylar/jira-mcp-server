@@ -638,7 +638,7 @@ def main() -> None:
         initialize_comment_tools(client)
 
         print("Starting Jira MCP Server...")
-        print(f"Jira URL: {config.jira_url}")
+        print(f"Jira URL: {config.url}")
         print(f"Cache TTL: {config.cache_ttl}s")
         print(f"Timeout: {config.timeout}s")
         print()

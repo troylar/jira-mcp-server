@@ -12,7 +12,7 @@ from jira_mcp_server.jira_client import JiraClient
 @pytest.fixture
 def mock_config() -> JiraConfig:
     """Create a mock JiraConfig for testing."""
-    return JiraConfig(jira_url="https://jira.test.com", jira_token="test-token-123")
+    return JiraConfig(url="https://jira.test.com", token="test-token-123")
 
 
 @pytest.fixture
